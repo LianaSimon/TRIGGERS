@@ -14,7 +14,7 @@ This project demonstrates SQL triggers for handling insert and delete operations
 
 # SQL SCRIPT
 
-USE COLLEGE;
+USE TABLE;
 
 * 1. CREATE A TABLE NAMED 'TEACHERS' AND INSERT 8 ROWS IN IT
   
@@ -54,5 +54,89 @@ INSERT INTO TEACHER(FULLNAME,SUBJECTNAME,EXPERIENCE,SALARY) VALUES
 
 
 * 3. Create teacher_log table
+  4. 
+CREATE TABLE teacher_log(teacher_id INT,action VARCHAR(20), timestamp DATETIME DEFAULT CURRENT_TIMESTAMP);
+
+-- Create an after insert trigger to log insert actions
+
+DELIMITER $$
+CREATE TRIGGER after_insert_teacher
+AFTER INSERT ON TEACHER
+FOR EACH ROW
+BEGIN
+INSERT INTO teacher_log(teacher_id,action,timestamp) VALUES (NEW.ID,'INSERT',NOW());
+END$$
+DELIMITER ;
+
+INSERT INTO TEACHER(ID,FULLNAME,SUBJECTNAME,EXPERIENCE,SALARY) VALUES(110,'Yuvan Derrick','Math',12,30000);
+SELECT *FROM teacher_log;
+
+![image](https://github.com/user-attachments/assets/afaf3458-aa5f-45e4-a55e-d4a930b467d4)
+
+* 4. Create a before delete trigger to prevent deletion if experience > 10 years
+
+  DELIMITER $$
+  
+CREATE TRIGGER before_delete_teacher
+BEFORE DELETE ON teacher
+FOR EACH ROW
+
+BEGIN
+IF OLD.EXPERIENCE>10 THEN
+SIGNAL SQLSTATE '45000'
+SET MESSAGE_TEXT='Cannot delete a teacher with more than 10 years of experience';
+END IF;
+
+END $$
+DELIMITER ;
+
+DELETE FROM TEACHER WHERE ID=101;
+ 
+![image](https://github.com/user-attachments/assets/cdaeddd6-c2e3-4dd8-8d9f-3520626143c8)
+
+* 5. Create an after delete trigger to log delete actions
+
+DELIMITER $$
+
+CREATE TRIGGER after_delete_teacher
+AFTER DELETE ON teacher
+FOR EACH ROW
+
+BEGIN
+INSERT INTO teacher_log(teacher_id,action,timestamp) VALUES (OLD.ID,'DELETE',NOW());
+END $$
+DELIMITER ;
+
+DELETE FROM TEACHER WHERE ID=106;
+SELECT * FROM teacher_log;
+
+
+  ![image](https://github.com/user-attachments/assets/c18d7531-9980-4a8f-a292-b19e33361f5c)
+
+
+# USAGE
+
+* Run the provided SQL script in MySQL Workbench or any MySQL-supported environment.
+  
+* The triggers will automatically enforce the constraints and log actions.
+
+  
+# PREREQUISITES
+
+* MySQL 8.0+ (for SIGNAL SQLSTATE error handling)
+* Basic SQL knowledge
+
+  
+# HOW IT WORKS
+
+* Any attempt to insert a negative salary raises an error.
+  
+* Successful insertions are logged in teacher_log.
+  
+* Attempting to delete a teacher with more than 10 years of experience is blocked.
+  
+* Successful deletions are logged in teacher_log.
+
+
 
 
