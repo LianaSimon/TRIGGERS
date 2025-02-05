@@ -54,7 +54,7 @@ INSERT INTO TEACHER(FULLNAME,SUBJECTNAME,EXPERIENCE,SALARY) VALUES
 
 
 * 3. Create teacher_log table
-  4. 
+     
 CREATE TABLE teacher_log(teacher_id INT,action VARCHAR(20), timestamp DATETIME DEFAULT CURRENT_TIMESTAMP);
 
 -- Create an after insert trigger to log insert actions
